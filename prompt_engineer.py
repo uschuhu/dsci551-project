@@ -34,7 +34,6 @@ def generate_mongo_query(user_question, sample_docs):
     {sample_docs}
     """
 
-
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_question}

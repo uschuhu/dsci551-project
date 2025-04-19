@@ -34,7 +34,7 @@ def execute_query(response_json):
             results = list(collection.aggregate(obj["pipeline"]))
         elif obj["operation"] == "insert":
             pass
-        elif obj["operation"] == "udpate":
+        elif obj["operation"] == "update":
             pass
         elif obj["operation"] == "delete":
             pass
