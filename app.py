@@ -1,8 +1,11 @@
 import streamlit as st
 import json
-from prompt_engineer import generate_mongo_query, summarize_results
+from prompt_engineer import generate_mongo_query, generate_sql_query, if_join_required, summarize_results, mongodb_or_sql
 from mongodb_connection import get_mongo_connection
+from mysql_connection import get_mysql_connection
 from utils import get_sample_documents
+import pandas as pd
+from sqlalchemy import create_engine, text
 
 # MongoDB Setup
 db = get_mongo_connection()
@@ -11,6 +14,11 @@ collections = {name: db[name] for name in collection_names}
 
 # Load sample docs for schema reference
 sample_docs = get_sample_documents(collections)
+
+# SQL setup
+sql_db = get_mysql_connection()
+conn = sql_db.connect()
+conn.execute(text("USE SocMed;"))
 
 # Execute GPT-generated MongoDB query
 def execute_query(response_json):
@@ -85,6 +93,26 @@ def execute_query(response_json):
             
     except Exception as e:
         return {"error": str(e)}
+    
+def execute_sql_query(response_sql, sql_db):
+    if response_sql[0:11] == "DESCRIPTIVE":
+        return {"success":"Operation successful."}
+    try:
+        df = pd.read_sql(text(response_sql), sql_db)
+        results = sql_db.execute(text(response_sql)).all()
+        print(results)
+        sql_db.execute(text("commit;"))
+        data = [row._mapping for row in results]
+        print(data)
+        return [row._mapping for row in results]
+    except Exception as e:
+        e_string = str(e)
+        if "does not return rows" in e_string:
+            sql_db.execute(text("commit;"))
+            return {"success":"Operation successful."}
+        else:
+            return {"error":"An error occurred. Please try again."}
+
 
 # ==========================================================
 # Streamlit UI
@@ -94,14 +122,33 @@ st.title("ChatDB: Natural Language Interface")
 user_question = st.text_input("Ask a question:")
 
 if user_question:
-    st.subheader("MongoDB Query")
-    query_str = generate_mongo_query(user_question, sample_docs)
-    st.code(query_str, language="json")
+    st.subheader("mongodb or sql?")
+    join_response = mongodb_or_sql(user_question, sample_docs)
+    st.success(join_response)
 
-    st.subheader("Query Results")
-    results = execute_query(query_str)
-    st.json(results)
+    if "MySQL" in join_response:
+        st.subheader("sql Query")
+        query_str = generate_sql_query(user_question)
+        st.code(query_str)
 
-    st.subheader("Natural Language Summary")
-    summary = summarize_results(user_question, results)
-    st.success(summary)
+        st.subheader("Query Results")
+        results = execute_sql_query(query_str, conn)
+        try:
+            st.dataframe(pd.DataFrame(results))
+        except:
+            st.json(results)
+
+    elif "MongoDB" in join_response:
+        query_str = generate_mongo_query(user_question, sample_docs)
+        st.code(query_str, language="json")
+
+        st.subheader("Query Results")
+        results = execute_query(query_str)
+        st.json(results)
+
+    try:
+        st.subheader("Natural Language Summary")
+        summary = summarize_results(user_question, results)
+        st.success(summary)
+    except:
+        st.subheader("Error occurred. Please try again.")
