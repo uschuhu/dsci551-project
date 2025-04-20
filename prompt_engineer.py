@@ -27,7 +27,8 @@ def generate_mongo_query(user_question, sample_docs):
     - "document": (only for 'insert') the document to be inserted
     - "update": (only for 'update') the update to apply (use $set, etc.)
 
-    Always include the "operation" field. 
+    Always include the "operation" field.
+    Only use "explore" when none of the other operations apply.
     Infer the correct collection(s) based on the question and data structure. Use $lookup for joining collections when needed.
 
     Use this example of the database schema for context:
