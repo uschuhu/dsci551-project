@@ -34,7 +34,7 @@ def generate_mongo_query(user_question, sample_docs, max_post_id):
     
 def summarize_results(question, result):
     prompt = [
-        {"role": "system", "content": f"Answer the user question concisely, in natural language, using the following MongoDB or SQL result:\n\n{result}"},
+        {"role": "system", "content": f"Answer the user question concisely, in natural language, using the following MongoDB or SQL result:\n\n{result}. If the result is empty, answer 'Empty Result'"},
         {"role": "user", "content": question}
     ]
     return chat(prompt, max_tokens=400)
