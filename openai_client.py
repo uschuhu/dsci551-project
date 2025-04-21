@@ -6,7 +6,7 @@ config = load_config()
 CHATGPT_API_KEY = config["CHATGPT_API_KEY"]
 client = OpenAI(api_key=CHATGPT_API_KEY)
 
-def chat(messages, temperature=0, max_tokens=200):
+def chat(messages, temperature=0, max_tokens=500):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=messages,

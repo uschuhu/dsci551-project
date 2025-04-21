@@ -24,7 +24,7 @@ conn.execute(text("USE SocMed;"))
 def execute_query(response_json):
     try:
         obj = json.loads(response_json)
-        print(obj)
+        # print(obj)
 
         if "error" in obj:
             return {"error": obj["error"]}
@@ -42,6 +42,7 @@ def execute_query(response_json):
         collection = db[obj["collection"]]
 
         if obj["operation"] == "find":
+            collection = db[obj["collection"]]
             try:
                 results = list(collection.find(obj["filter"], obj.get("projection", {})))
                 return results
@@ -49,13 +50,14 @@ def execute_query(response_json):
                 return {"error": str(e)}
             
         elif obj["operation"] == "aggregate":
+            collection = db[obj["collection"]]
             try:
                 results = list(collection.aggregate(obj["pipeline"]))
                 return results
             except Exception as e:
                 return {"error": str(e)}
 
-        elif obj["operation"] == "insert":
+        elif obj["operation"] == "insertOne" or obj["operation"] == "insertMany":
             try:
                 if isinstance(obj["document"], list):
                     insert_result = collection.insert_many(obj["document"])
@@ -65,10 +67,27 @@ def execute_query(response_json):
                     return {"inserted_id": str(insert_result.inserted_id)}
             except Exception as e:
                 return {"error": str(e)}
+
+        # elif obj["operation"] in ["insertOne", "insertMany"]:
+        #     try:
+        #         inserted = {}
+        #         for coll_name in obj["collections"]:
+        #             docs = obj["documents"][coll_name]
+        #             coll = db[coll_name]
+        #             if isinstance(docs, list):
+        #                 result = coll.insert_many(docs)
+        #                 inserted[coll_name] = [str(_id) for _id in result.inserted_ids]
+        #             else:
+        #                 result = coll.insert_one(docs)
+        #                 inserted[coll_name] = str(result.inserted_id)
+        #         return {"inserted": inserted}
+        #     except Exception as e:
+        #         return {"error": str(e)}
+
             
-        elif obj["operation"] == "update":
+        elif obj["operation"] == "updateOne" or obj["operation"] == "updateMany":
             try:
-                if obj.get("many", False):
+                if obj["operation"] == "updateMany":
                     update_result = collection.update_many(obj["filter"], obj["update"])
                 else:
                     update_result = collection.update_one(obj["filter"], obj["update"])
@@ -79,9 +98,9 @@ def execute_query(response_json):
             except Exception as e:
                 return {"error": str(e)}
 
-        elif obj["operation"] == "delete":
+        elif obj["operation"] == "deleteOne" or obj["operation"] == "deleteMany":
             try:
-                if obj.get("many", False):
+                if obj["operation"] == "deleteMany":
                     delete_result = collection.delete_many(obj["filter"])
                 else:
                     delete_result = collection.delete_one(obj["filter"])
@@ -113,7 +132,6 @@ def execute_sql_query(response_sql, sql_db):
         else:
             return {"error":"An error occurred. Please try again."}
 
-
 # ==========================================================
 # Streamlit UI
 st.set_page_config(page_title="ChatDB", layout="wide")
@@ -122,13 +140,15 @@ st.title("ChatDB: Natural Language Interface")
 user_question = st.text_input("Ask a question:")
 
 if user_question:
-    st.subheader("mongodb or sql?")
+    st.subheader("Database used")
     join_response = mongodb_or_sql(user_question, sample_docs)
     st.success(join_response)
 
     if "MySQL" in join_response:
-        st.subheader("sql Query")
+        st.subheader("SQL Query")
         query_str = generate_sql_query(user_question)
+        if query_str[0:3] == "```":
+            query_str = query_str[7:3]
         st.code(query_str)
 
         st.subheader("Query Results")
@@ -139,7 +159,9 @@ if user_question:
             st.json(results)
 
     elif "MongoDB" in join_response:
-        query_str = generate_mongo_query(user_question, sample_docs)
+        st.subheader("MongoDB Query")
+        max_id = db.posts.find().sort("post_id", -1).limit(1)[0]["post_id"]
+        query_str = generate_mongo_query(user_question, sample_docs, max_id)
         st.code(query_str, language="json")
 
         st.subheader("Query Results")
