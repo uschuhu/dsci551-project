@@ -68,22 +68,6 @@ def execute_query(response_json):
             except Exception as e:
                 return {"error": str(e)}
 
-        # elif obj["operation"] in ["insertOne", "insertMany"]:
-        #     try:
-        #         inserted = {}
-        #         for coll_name in obj["collections"]:
-        #             docs = obj["documents"][coll_name]
-        #             coll = db[coll_name]
-        #             if isinstance(docs, list):
-        #                 result = coll.insert_many(docs)
-        #                 inserted[coll_name] = [str(_id) for _id in result.inserted_ids]
-        #             else:
-        #                 result = coll.insert_one(docs)
-        #                 inserted[coll_name] = str(result.inserted_id)
-        #         return {"inserted": inserted}
-        #     except Exception as e:
-        #         return {"error": str(e)}
-
             
         elif obj["operation"] == "updateOne" or obj["operation"] == "updateMany":
             try:
@@ -136,15 +120,15 @@ def execute_sql_query(response_sql, sql_db):
 # Streamlit UI
 st.set_page_config(page_title="ChatDB", layout="wide")
 st.title("ChatDB: Natural Language Interface")
-
+chosen_db = st.selectbox("Choose a database:", ["MySQL", "MongoDB"])
 user_question = st.text_input("Ask a question:")
 
 if user_question:
-    st.subheader("Database used")
-    join_response = mongodb_or_sql(user_question, sample_docs)
-    st.success(join_response)
+    # st.subheader("Database used")
+    # join_response = mongodb_or_sql(user_question, sample_docs)
+    # st.success(join_response)
 
-    if "MySQL" in join_response:
+    if "MySQL" in chosen_db:
         st.subheader("SQL Query")
         query_str = generate_sql_query(user_question)
         if query_str[0:3] == "```":
@@ -158,7 +142,7 @@ if user_question:
         except:
             st.json(results)
 
-    elif "MongoDB" in join_response:
+    elif "MongoDB" in chosen_db:
         st.subheader("MongoDB Query")
         max_id = db.posts.find().sort("post_id", -1).limit(1)[0]["post_id"]
         query_str = generate_mongo_query(user_question, sample_docs, max_id)

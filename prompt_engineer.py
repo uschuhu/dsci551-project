@@ -10,7 +10,7 @@ def generate_mongo_query(user_question, sample_docs, max_post_id):
     - "collection": the name of the main collection to query
     - "filter": (only for 'find' or 'delete') the query conditions
     - "projection": (only for 'find') the fields to include or exclude (always exclude '_id')
-    - "pipeline": a valid aggregation pipeline including any $match, $group, $sort, $project, $limit, $lookup, etc.
+    - "pipeline": (only for 'aggregate') a valid aggregation pipeline including any $match, $group, $sort, $project, $limit, $lookup, etc.
     - "document": (only for 'insert') the document to be inserted
     - "update": (only for 'update') the update to apply (use $set, etc.)
 
