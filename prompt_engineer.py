@@ -48,7 +48,7 @@ def generate_sql_query(user_question):
     Read the database schema from the following SQL table creation statement:
     CREATE TABLE `Users` (
     `USER_ID` INT,
-    `HANDLE` VARCHAR(32) UNIQUE NOT NULL,
+    `HANDLE` VARCHAR(32) NOT NULL,
     `PASSWORD` VARCHAR(255) NOT NULL,
     `EMAIL` VARCHAR(255) NOT NULL,
     PRIMARY KEY (`USER_ID`)
@@ -57,20 +57,16 @@ def generate_sql_query(user_question):
     CREATE TABLE `Posts` (
     `POST_ID` VARCHAR(50),
     `USER_ID` INT,
-    PRIMARY KEY (`POST_ID`, `USER_ID`),
-    FOREIGN KEY (`USER_ID`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    KEY `FK1` (`POST_ID`),
-    KEY `FK2` (`USER_ID`)
+    PRIMARY KEY (`POST_ID`),
+    FOREIGN KEY (`USER_ID`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     CREATE TABLE `Follows` (
-    `FOLLOWER` INT,
-    `FOLLOWING` INT,
+    `FOLLOWER` VARCHAR(32),
+    `FOLLOWING` VARCHAR(32),
     PRIMARY KEY (`FOLLOWER`, `FOLLOWING`),
     FOREIGN KEY (`FOLLOWER`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (`FOLLOWING`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    KEY `FK1` (`FOLLOWER`),
-    KEY `FK2` (`FOLLOWING`)
+    FOREIGN KEY (`FOLLOWING`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE
     );
     """
 
@@ -102,10 +98,8 @@ def if_join_required(user_question, sample_docs):
     CREATE TABLE `Posts` (
     `POST_ID` VARCHAR(50),
     `USER_ID` INT,
-    PRIMARY KEY (`POST_ID`, `USER_ID`),
-    FOREIGN KEY (`USER_ID`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    KEY `FK1` (`POST_ID`),
-    KEY `FK2` (`USER_ID`)
+    PRIMARY KEY (`POST_ID`),
+    FOREIGN KEY (`USER_ID`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     CREATE TABLE `Follows` (
@@ -113,9 +107,7 @@ def if_join_required(user_question, sample_docs):
     `FOLLOWING` VARCHAR(32),
     PRIMARY KEY (`FOLLOWER`, `FOLLOWING`),
     FOREIGN KEY (`FOLLOWER`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (`FOLLOWING`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    KEY `FK1` (`FOLLOWER`),
-    KEY `FK2` (`FOLLOWING`)
+    FOREIGN KEY (`FOLLOWING`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     Read the key names from the sample documents for MongoDB: {sample_docs}
@@ -153,10 +145,8 @@ def mongodb_or_sql(user_question, sample_docs):
     CREATE TABLE `Posts` (
     `POST_ID` VARCHAR(50),
     `USER_ID` INT,
-    PRIMARY KEY (`POST_ID`, `USER_ID`),
-    FOREIGN KEY (`USER_ID`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    KEY `FK1` (`POST_ID`),
-    KEY `FK2` (`USER_ID`)
+    PRIMARY KEY (`POST_ID`),
+    FOREIGN KEY (`USER_ID`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     CREATE TABLE `Follows` (
@@ -164,9 +154,7 @@ def mongodb_or_sql(user_question, sample_docs):
     `FOLLOWING` VARCHAR(32),
     PRIMARY KEY (`FOLLOWER`, `FOLLOWING`),
     FOREIGN KEY (`FOLLOWER`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (`FOLLOWING`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE,
-    KEY `FK1` (`FOLLOWER`),
-    KEY `FK2` (`FOLLOWING`)
+    FOREIGN KEY (`FOLLOWING`) REFERENCES `Users`(`USER_ID`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     Read the key names from the sample documents for MongoDB: {sample_docs}
