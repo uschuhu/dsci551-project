@@ -152,9 +152,9 @@ if user_question:
         results = execute_query(query_str)
         st.json(results)
 
-    try:
-        st.subheader("Natural Language Summary")
-        summary = summarize_results(user_question, results)
-        st.success(summary)
-    except:
-        st.subheader("Error occurred. Please try again.")
+        try:
+            st.subheader("Natural Language Summary")
+            summary = summarize_results(user_question, results)
+            st.text(summary)
+        except:
+            st.subheader("Error occurred. Please try again.")
