@@ -1,0 +1,8 @@
+{
+    "CHATGPT_API_KEY": "your-key-here",
+    "MONGODB_P": "dbqqylwxxnwan", 
+    "MYSQL_U": "admin",
+    "MYSQL_P": "PgsuGcQwJeMxLESqjDUi",
+    "MYSQL_HOST": "dsci551-project-db.cd6gcmmkolsx.us-east-2.rds.amazonaws.com",
+    "MYSQL_PORT": "3306"
+}
